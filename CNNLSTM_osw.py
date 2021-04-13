@@ -96,7 +96,7 @@ def make_Window_List(database, epoc, insert_flag, insert_rate):
 
 
 
-#加载动作相关数据到内存
+# Load action data into memory
 vec_path = '.' + os.sep + 'Vecs'
 vec_list = os.listdir(vec_path)
 
@@ -108,12 +108,12 @@ train_base = load_Data(vec_path, train_file_list)
 valid_base = load_Data(vec_path, valid_file_list)
 test_base  = load_Data(vec_path, test_file_list)
 
-#加载补间数据到内存
+# Load no-action data into memory
 sep_path = '.' + os.sep + 'Seps'
 sep_list = os.listdir(sep_path)
 sep_base = load_Data(sep_path, sep_list)
 
-#超参数仓库，输出数据统计和超参数统计
+# Hyperparameters
 EPOC = 5
 WINDOW_SIZE = 60
 WINDOW_STEP = 10
@@ -132,7 +132,7 @@ print("----Window Size: {}.".format(WINDOW_SIZE))
 print("----Window Step: {}.".format(WINDOW_STEP))
 print("######################DATA ANALYZE######################\n")
 
-#定义模型
+# Define model
 def create_model():
 	model = Sequential()
 	model.add(layers.TimeDistributed(layers.Conv2D(32, (3,3), (3,1), activation='tanh'), input_shape=(TIME_STEP, WINDOW_SIZE, 7, 1)))
@@ -149,12 +149,12 @@ model = create_model()
 callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=3)
 model.summary()
 
-#生成固定数据集
+# Generate datastream
 test_data_list, test_label_list = make_Window_List(test_base, 1, True, TEST_INSERT_RATE)
 valid_data_list, valid_label_list = make_Window_List(valid_base, 1, True, TEST_INSERT_RATE)
 
 
-#单次训练
+# Training
 train_data_list, train_label_list = make_Window_List(train_base, EPOC, True, TRAIN_INSERT_RATE)
 history = model.fit(train_data_list, train_label_list, validation_data=(valid_data_list, valid_label_list), batch_size=128, epochs=15, callbacks=[callback])
 test_loss, test_acc = model.evaluate(test_data_list, test_label_list)
